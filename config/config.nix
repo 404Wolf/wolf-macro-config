@@ -1,4 +1,71 @@
-{ modulesPath, pkgs, ... }: {
+{ modulesPath, pkgs, lib, ... }:
+let
+  commonLibs = with pkgs; [
+    # C++ / compiler runtime
+    stdenv.cc.cc.lib
+    libgcc
+
+    # compression
+    zlib
+    bzip2
+    xz
+    zstd
+
+    # crypto / TLS
+    openssl
+    libgpg-error
+    libgcrypt
+
+    # networking
+    curl
+
+    # common system libs
+    glib
+    libffi
+    readline
+    ncurses
+    sqlite
+    libxml2
+    libxslt
+    util-linux  # libuuid, libmount, libblkid
+    udev        # libudev
+    libpcre2
+
+    # image formats
+    libpng
+    libjpeg
+    libtiff
+
+    # audio
+    alsa-lib
+    libpulseaudio
+
+    # graphics / display
+    nss
+    nspr
+    dbus
+    atk
+    cups
+    libdrm
+    expat
+    libxkbcommon
+    xorg.libX11
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXrandr
+    xorg.libxcb
+    mesa
+    wayland
+    pango
+    cairo
+    icu
+    freetype
+    fontconfig
+  ];
+in
+{
   imports = [ "${modulesPath}/profiles/qemu-guest.nix" ];
 
   boot.loader.grub.enable = true;
@@ -15,6 +82,15 @@
 
   programs.zsh.enable = true;
   programs.nix-index-database.comma.enable = true;
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = commonLibs;
+  };
+
+  # nix-ld only intercepts unpatched ELF loaders; nixpkgs Python uses the nix
+  # store's ld directly, so pip C-extensions need LD_LIBRARY_PATH instead.
+  environment.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath commonLibs;
 
   users.users.wolf = {
     isNormalUser = true;
