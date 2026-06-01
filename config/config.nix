@@ -29,7 +29,7 @@ let
     libxslt
     util-linux  # libuuid, libmount, libblkid
     udev        # libudev
-    libpcre2
+    pcre2
 
     # image formats
     libpng
@@ -91,6 +91,9 @@ in
   # nix-ld only intercepts unpatched ELF loaders; nixpkgs Python uses the nix
   # store's ld directly, so pip C-extensions need LD_LIBRARY_PATH instead.
   environment.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath commonLibs;
+  programs.zsh.shellInit = ''
+    export LD_LIBRARY_PATH="${lib.makeLibraryPath commonLibs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  '';
 
   users.users.wolf = {
     isNormalUser = true;
@@ -111,6 +114,7 @@ in
     git
     btop
     htop
+    awscli2
   ];
 
   environment.sessionVariables.EDITOR = "zeditor --wait";
