@@ -7,9 +7,13 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, disko, ... }: let
+  outputs = { nixpkgs, disko, nix-index-database, ... }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
   in {
@@ -17,6 +21,7 @@
       inherit system;
       modules = [
         disko.nixosModules.disko
+        nix-index-database.nixosModules.nix-index
         ./config/disk.nix
         ./config/config.nix
         ./config/virt.nix

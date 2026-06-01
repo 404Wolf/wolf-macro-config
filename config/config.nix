@@ -14,6 +14,7 @@
   };
 
   programs.zsh.enable = true;
+  programs.nix-index-database.comma.enable = true;
 
   users.users.wolf = {
     isNormalUser = true;
@@ -32,6 +33,8 @@
     zed-editor
     neovim
     git
+    btop
+    htop
   ];
 
   environment.sessionVariables.EDITOR = "zeditor --wait";
