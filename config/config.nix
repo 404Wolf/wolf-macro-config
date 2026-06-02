@@ -68,6 +68,8 @@ in
 {
   imports = [ "${modulesPath}/profiles/qemu-guest.nix" ];
 
+  hardware.graphics.enable = true;
+
   boot.loader.grub.enable = true;
 
   swapDevices = [{ device = "/swapfile"; size = 16 * 1024; }];
@@ -109,6 +111,7 @@ in
   networking.hostName = "wolf-vm";
 
   environment.systemPackages = with pkgs; [
+    waypipe
     zed-editor
     neovim
     git
