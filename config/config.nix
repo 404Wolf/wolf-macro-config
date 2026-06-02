@@ -113,6 +113,8 @@ in
   environment.systemPackages = with pkgs; [
     waypipe
     zed-editor
+    waypipe
+    gnupg
     neovim
     git
     btop

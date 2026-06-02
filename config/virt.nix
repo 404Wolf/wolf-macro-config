@@ -1,14 +1,9 @@
 { pkgs, ... }: {
-  virtualisation = {
-    docker.enable = true;
-    podman.enable = true;
-    oci-containers.backend = "podman";
-  };
+  virtualisation.docker.enable = true;
 
   environment.systemPackages = with pkgs; [
     docker-compose
-    podman-compose
   ];
 
-  users.users.wolf.extraGroups = [ "docker" "podman" ];
+  users.users.wolf.extraGroups = [ "docker" ];
 }
