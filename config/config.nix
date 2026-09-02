@@ -1,6 +1,8 @@
 { modulesPath, pkgs, lib, ... }:
 let
-  commonLibs = with pkgs; [
+  # Fed to nix-ld only. nix-ld intercepts unpatched foreign ELFs and never
+  # overrides a nix-built binary's own RPATH, so this list can be generous.
+  nixLdLibs = with pkgs; [
     # C++ / compiler runtime
     stdenv.cc.cc.lib
     libgcc
@@ -49,13 +51,13 @@ let
     libdrm
     expat
     libxkbcommon
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libxcb
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxrandr
+    libxcb
     mesa
     wayland
     pango
@@ -63,6 +65,28 @@ let
     icu
     freetype
     fontconfig
+  ];
+
+  # Fed to LD_LIBRARY_PATH, which outranks every binary's own RPATH — including
+  # nix-built ones. Anything listed here is forced on Firefox, Chromium, git,
+  # etc., so a lib built against a different nixpkgs rev than theirs breaks
+  # them outright (e.g. nss here shadows comma's newer firefox and it won't
+  # start). Keep this to what pip C-extensions actually link against; put
+  # graphics, crypto, and text-processing libs in nixLdLibs only.
+  pipLibs = with pkgs; [
+    stdenv.cc.cc.lib
+    libgcc
+
+    zlib
+    bzip2
+    xz
+    zstd
+
+    openssl
+    libffi
+    readline
+    ncurses
+    sqlite
   ];
 in
 {
@@ -87,14 +111,14 @@ in
 
   programs.nix-ld = {
     enable = true;
-    libraries = commonLibs;
+    libraries = nixLdLibs;
   };
 
   # nix-ld only intercepts unpatched ELF loaders; nixpkgs Python uses the nix
   # store's ld directly, so pip C-extensions need LD_LIBRARY_PATH instead.
-  environment.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath commonLibs;
+  environment.sessionVariables.LD_LIBRARY_PATH = lib.makeLibraryPath pipLibs;
   programs.zsh.shellInit = ''
-    export LD_LIBRARY_PATH="${lib.makeLibraryPath commonLibs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${lib.makeLibraryPath pipLibs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   '';
 
   users.users.wolf = {
@@ -108,7 +132,7 @@ in
 
   security.sudo.wheelNeedsPassword = false;
 
-  networking.hostName = "wolf-vm";
+  networking.hostName = "wolf-macro-vm";
 
   environment.systemPackages = with pkgs; [
     waypipe
