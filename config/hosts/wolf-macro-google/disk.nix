@@ -65,6 +65,11 @@
             mountpoint = "/home";
             options.mountpoint = "legacy";
           };
+          docker = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/docker";
+            options.mountpoint = "legacy";
+          };
         };
       };
     };
