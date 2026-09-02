@@ -1,5 +1,10 @@
-{ lib, ... }: {
+{ lib, config, ... }: {
   services.tailscale.enable = true;
+
+  # tailscale needs to reach out/in on this UDP port on every interface for
+  # direct (non-DERP-relayed) connections; harmless to open even on hosts
+  # with no public interface.
+  networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
 
   services.resolved = {
     enable = true;

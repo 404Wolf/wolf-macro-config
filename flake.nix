@@ -16,19 +16,22 @@
   outputs = { nixpkgs, disko, nix-index-database, ... }: let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
-  in {
-    nixosConfigurations.wolf-vm = nixpkgs.lib.nixosSystem {
+
+    mkHost = { name, extraModules ? [] }: nixpkgs.lib.nixosSystem {
       inherit system;
       modules = [
         disko.nixosModules.disko
         nix-index-database.nixosModules.nix-index
-        ./config/disk.nix
         ./config/config.nix
-        ./config/virt.nix
         ./config/nix.nix
         ./config/network.nix
-      ];
+        ./config/hosts/${name}
+      ] ++ extraModules;
     };
+  in {
+    nixosConfigurations.wolf-vm = mkHost { name = "wolf-vm"; };
+
+    nixosConfigurations.wolf-macro-google = mkHost { name = "wolf-macro-google"; };
 
     devShells.${system}.default = pkgs.mkShell {
       packages = [ pkgs.just ];

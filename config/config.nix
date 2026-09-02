@@ -1,4 +1,4 @@
-{ modulesPath, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 let
   # Fed to nix-ld only. nix-ld intercepts unpatched foreign ELFs and never
   # overrides a nix-built binary's own RPATH, so this list can be generous.
@@ -90,14 +90,6 @@ let
   ];
 in
 {
-  imports = [ "${modulesPath}/profiles/qemu-guest.nix" ];
-
-  hardware.graphics.enable = true;
-
-  boot.loader.grub.enable = true;
-
-  swapDevices = [{ device = "/swapfile"; size = 16 * 1024; }];
-
   services.openssh = {
     enable = true;
     settings = {
@@ -131,8 +123,6 @@ in
   };
 
   security.sudo.wheelNeedsPassword = false;
-
-  networking.hostName = "wolf-macro-vm";
 
   environment.systemPackages = with pkgs; [
     waypipe
