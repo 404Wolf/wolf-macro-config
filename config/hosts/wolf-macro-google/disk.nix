@@ -70,6 +70,17 @@
             mountpoint = "/var/lib/docker";
             options.mountpoint = "legacy";
           };
+          # /tmp on the pool: the 9G root disk filled twice with scratch data
+          # (opencode work dirs, bun caches, tool output). NixOS's tmpfiles rule
+          # keeps the mountpoint 1777 on every boot.
+          tmp = {
+            type = "zfs_fs";
+            mountpoint = "/tmp";
+            options = {
+              mountpoint = "legacy";
+              atime = "off";
+            };
+          };
         };
       };
     };
